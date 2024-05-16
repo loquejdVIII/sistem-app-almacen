@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Herramientas en el Almacén</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+
+    {% if mensaje_error %}
+        <p class="error">{{ mensaje_error }}</p>
+    {% endif %}
+
+    <div class="usuario">
+        <p>Usuario: {{ request.user.username }}</p>
+    </div>
+
+    <div class="welcome">
+        <a href="{% url 'salir' %}" class="button-grey">Cerrar Sesión</a>
+    </div>
+
+    <h1>Número total de herramientas en el almacén: {{ total_herramientas }}</h1>
+    
+    <div class="ruta">
+        <p>Ruta actual de la carpeta de lectura:</p>
+        {% if ruta %}
+            <span class="ruta-actual">{{ ruta }}</span>
+        {% else %}
+            <span class="ruta-no-especificada">No especificada</span>
+        {% endif %}
+        <a href="{% url 'seleccionar_ruta' %}" class="cambiar-ruta">Cambiar</a>
+    </div>    
+    
+    <form method="get">
+        <label for="herramienta">Filtrar por herramienta:</label>
+        <select name="herramienta" id="herramienta">
+            <option value="">Todas las herramientas</option>
+            {% for herramienta in herramientas %}
+                <option value="{{ herramienta.nombre_herramienta }}">{{ herramienta.nombre_herramienta }}</option>
+            {% endfor %}
+        </select>                
+        <button type="submit">Filtrar</button>
+    </form>
+    <form method="post" id="leer-datos-form">
+        {% csrf_token %}
+        <button type="submit" name="leer_datos">Leer Datos</button>
+        <button type="submit" name="detener_lectura">Detener Lectura</button>
+        <button type="submit" name="actualizar_datos">Actualizar</button>
+        <button type="submit" name="limpiar_datos">Limpiar</button>
+    </form>      
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Tiempo</th>
+                <th>Nombre de la herramienta</th>
+                <th>Etiqueta ID</th>
+                <th>Longitud</th>
+                <th>Antena</th>
+                <th>Contador</th>
+                <th>Índice de Intensidad de la Señal Recibida</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lectura in lecturas %}
+                <tr>
+                    <td>{{ lectura.tiempo }}</td>
+                    <td>{{ lectura.nombre_herramienta }}</td>
+                    <td>{{ lectura.tag_id }}</td>
+                    <td>{{ lectura.length }}</td>
+                    <td>{{ lectura.ant }}</td>
+                    <td>{{ lectura.cnt }}</td>
+                    <td>{{ lectura.rssi }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>    
+    <a href="{% url 'administrar_codigos' %}" class="administrar-codigos">Administrar Códigos de Herramientas</a>
+    <div class="admin-link">
+        <a href="{% url 'admin:index' %}" class="admin-link">Acceder al administrador</a>      
+    </div>
+</body>
+</html>

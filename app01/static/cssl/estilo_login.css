@@ -1,0 +1,44 @@
+/* Estilo para el formulario de login */
+form {
+    margin: 20px auto;
+    padding: 20px;
+    width: 300px;
+    background-color: #f9f9f9; /* Fondo gris claro */
+    border: 1px solid #ddd; /* Borde gris */
+    border-radius: 5px;
+}
+
+/* Estilo para los campos de entrada */
+input[type="text"],
+input[type="password"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Estilo para el botón de login */
+button[type="submit"] {
+    width: calc(100% - 22px);
+    background-color: #2d9062; /* Color de fondo verde */
+    color: white;
+    padding: 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Estilo para el botón de login al pasar el cursor */
+button[type="submit"]:hover {
+    background-color: #5dd284; /* Color de fondo verde más claro */
+}
+
+/* Estilo para el título "Login" */
+h2 {
+    text-align: center;
+    color: #2d9062; /* Color de texto verde */
+}

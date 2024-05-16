@@ -1,0 +1,188 @@
+.error {
+    color: red;
+}
+
+.ruta {
+    margin-bottom: 10px;
+}
+
+.ruta p {
+    display: inline;
+}
+
+.ruta-actual {
+    color: black;
+}
+
+.ruta-no-especificada {
+    color: red;
+}
+
+.cambiar-ruta {
+    display: inline;
+    margin-left: 10px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+#leer-datos-form button {
+    margin-right: 10px;
+    background-color: #4CAF50; /* Verde claro */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#leer-datos-form button:hover {
+    background-color: #45a049; /* Verde más oscuro al pasar el mouse */
+}
+
+.usuario {
+    margin-top: 20px;
+}
+
+.green-button {
+    background-color: #4CAF50; /* Verde claro */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.usuario p {
+    font-size: 20px; /* Tamaño del texto */
+    font-weight: bold; /* Texto en negrita */
+    color: #022402; /* Color del texto */
+    margin-bottom: 10px; /* Espacio en la parte inferior */
+    font-family: 'Helvetica', sans-serif;
+}
+
+.administrar-codigos,
+.admin-link a,
+.cerrar-sesion {
+    display: inline-block;
+    margin-top: 20px;
+    margin-right: 20px; /* Espacio a la derecha */
+    background-color: #4CAF50; /* Mismo verde claro */
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.administrar-codigos:hover,
+.admin-link a:hover,
+.cerrar-sesion:hover {
+    background-color: #45a049; /* Verde más oscuro al pasar el mouse */
+}
+
+.admin-link {
+    position: absolute;
+    top: 0px;
+    right: 0px; /* Espacio a la derecha */
+}
+
+.admin-link a {
+    background-color: #333;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    white-space: nowrap; /* Evitar saltos de línea */
+}
+
+.admin-link a:hover {
+    background-color: #555;
+}
+
+/* Mover "Cerrar Sesión" debajo de "Acceder como administrador" */
+.cerrar-sesion {
+    display: inline-block;
+    margin-top: 10px;
+    margin-right: 20px; /* Espacio a la derecha */
+}
+
+/* Estilos para la tabla */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th, .data-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #f2f2f2;
+}
+
+/* Estilo para el botón gris */
+.grey-button {
+    background-color: #555; /* Gris */
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 10px; /* Espacio en la parte superior */
+}
+
+/* Estilo para el mensaje de confirmación */
+.mensaje-confirmacion {
+    color: green;
+}
+
+/* Estilo para el mensaje de confirmación */
+.mensaje-confirmacion {
+    color: green;
+}
+
+/* Estilo para el grupo de entrada (input) */
+.input-group {
+    margin-bottom: 10px; /* Separación entre grupos de entrada */
+}
+
+.input-group label {
+    display: inline-block;
+    width: 150px; /* Ancho fijo para las etiquetas */
+}
+
+.input-group input {
+    width: 27%; /* Ancho dinámico para los campos de entrada */
+    /* Calculado restando el ancho de la etiqueta y un espacio adicional */
+    padding: 3px;
+    box-sizing: border-box;
+}
+
+.button-grey {
+    background-color: #333; /* Gris oscuro */
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Transición suave del color de fondo */
+}
+
+/* Estilo para el botón gris al pasar el cursor */
+.button-grey:hover {
+    background-color: #555; /* Gris más claro */
+}
+
+.welcome {
+    position: absolute; /* Posicionamiento absoluto */
+    top: 58px; /* Distancia desde la parte superior */
+    right: 18px; /* Distancia desde la derecha */
+}

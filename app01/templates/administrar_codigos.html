@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administrar Códigos de Herramientas</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+    <h1>Administrar Códigos de Herramientas</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="input-group">
+            <label for="etiqueta_id">ID de la Etiqueta:</label>
+            <input type="text" id="etiqueta_id" name="etiqueta_id" required>
+        </div>
+        <div class="input-group">
+            <label for="nombre_herramienta">Nombre de la Herramienta:</label>
+            <input type="text" id="nombre_herramienta" name="nombre_herramienta" required>
+        </div>
+        <button type="submit" class="green-button">Guardar</button>
+    </form>
+    <!-- Mensaje de confirmación -->
+    {% if datos_guardados %}
+        <p class="mensaje-confirmacion">Datos guardados correctamente</p>
+    {% endif %}
+    <!-- Botón para regresar -->
+    <a href="{% url 'principal' %}" class="grey-button">Regresar</a>
+</body>
+</html>

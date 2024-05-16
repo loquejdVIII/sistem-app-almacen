@@ -1,0 +1,18 @@
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cambio de la ruta de lectura</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+    <h1>Cambio de la ruta de lectura</h1>
+
+    <form method="post" action="{% url 'seleccionar_ruta' %}">
+        {% csrf_token %}
+        <label for="nueva_ruta">Especifique la ruta:</label>
+        <input type="text" name="nueva_ruta" id="nueva_ruta">
+        <button type="submit" class="green-button">Guardar</button>
+    </form>
+</body>
+</html>
