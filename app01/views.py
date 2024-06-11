@@ -1,34 +1,76 @@
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from .management.commands.leedor_excel import detener_lectura_carpeta, leer_excel_view
+from django.views.decorators.csrf import csrf_exempt
+from .management.commands.monitor import start_monitoring, stop_monitoring
 from .models import nombreEtiqueta, lecturaRFID, seleccionarRuta
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import logout
+from datetime import datetime
+from django.shortcuts import render, get_object_or_404, redirect
+import threading
+
+def es_administrador(user):
+    return user.groups.filter(name='Administrador').exists()
+
+# Variables globales para el monitor y el hilo
+monitor = None
+monitor_thread = None
 
 @login_required
+@csrf_exempt
+def control_monitor_view(request):
+    global monitor, monitor_thread
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'start':
+            if monitor is None:  # Asegúrate de que el monitor no esté ya en ejecución
+                monitor = start_monitoring()
+                if monitor:
+                    # Crear un hilo para el monitor y arrancarlo
+                    monitor_thread = threading.Thread(target=keep_monitor_running)
+                    monitor_thread.start()
+                    return JsonResponse({"status": "success", "message": "Monitoreo iniciado"})
+                else:
+                    return JsonResponse({"status": "error", "message": "No se encontró la ruta de la carpeta"})
+            else:
+                return JsonResponse({"status": "error", "message": "El monitoreo ya está en ejecución"})
+        elif action == 'stop':
+            if monitor:
+                stop_monitoring(monitor)
+                monitor = None
+                monitor_thread.join()  # Esperar a que el hilo termine
+                return JsonResponse({"status": "success", "message": "Monitoreo detenido"})
+            else:
+                return JsonResponse({"status": "error", "message": "No hay monitoreo en ejecución"})
+        elif action == 'update':
+            # Implementa la lógica para actualizar los datos aquí
+            # Ejemplo: refrescar los datos desde la fuente
+            return JsonResponse({"status": "success", "message": "Datos actualizados"})
+        elif action == 'clear':
+            lecturaRFID.objects.all().delete()
+            return JsonResponse({"status": "success", "message": "Datos limpiados"})
+    
+    return JsonResponse({"status": "error", "message": "Acción no válida"})
 
+@login_required
+def keep_monitor_running():
+    while monitor:
+        pass  # Mantener el monitor en ejecución
+
+@login_required
+def monitor_status_view(request):
+    if monitor:
+        return JsonResponse({"status": "running"})
+    else:
+        return JsonResponse({"status": "stopped"})
+
+@login_required
 def principal(request):
 
     lecturas = lecturaRFID.objects.all()
     herramientas = nombreEtiqueta.objects.all()
     verificar_ruta = seleccionarRuta.objects.first()
-    
-    if request.method == 'POST':
-        if 'leer_datos' in request.POST:
-            print("se presiono leer datos")
-            if verificar_ruta and verificar_ruta.carpeta_excel:
-                print("se ejecuta la lectura")
-                leer_excel_view(request)
-            else:
-                # Si la carpeta de Excel no está especificada, mostrar un mensaje de advertencia
-                mensaje_error = "No se puede leer datos porque no se ha especificado la ruta de la carpeta de lectura."
-                return render(request, 'principal.html', {'mensaje_error': mensaje_error})
-        elif 'limpiar_datos' in request.POST:
-            # Eliminar todas las lecturas RFID de herramientas
-            lecturaRFID.objects.all().delete()
-            # Redireccionar a la misma página
-        elif 'detener_lectura' in request.POST:
-            print("se detiene la lectura")
-            detener_lectura_carpeta()       
         
     if verificar_ruta:
         ruta = verificar_ruta.carpeta_excel
@@ -48,8 +90,21 @@ def principal(request):
     
     # Filtrar las lecturas si se envió el formulario de filtro
     herramienta_seleccionada = request.GET.get('herramienta')
+    fecha_creacion = request.GET.get('fecha_creacion')
+
     if herramienta_seleccionada:
         lecturas = lecturas.filter(nombre_herramienta=herramienta_seleccionada)
+
+    if fecha_creacion:
+        # Convertir la fecha del formulario a formato datetime
+        fecha_creacion = datetime.strptime(fecha_creacion, "%Y-%m-%d").date()
+        # Filtrar las lecturas por fecha de creación ignorando la hora
+        lecturas = lecturas.filter(fecha_modificacion__date=fecha_creacion)
+
+    total_disponibles = lecturas.filter(estado='disponible').count()
+    total_no_disponibles_obra = lecturas.filter(estado='no_disponible_obra').count()
+    total_no_disponibles_malogrado = lecturas.filter(estado='no_disponible_malogrado').count()
+    total_no_especificado = lecturas.filter(estado='no_especificado').count()
 
     # Renderizar el template con los datos de las lecturas y herramientas
     return render(request, 'principal.html', {
@@ -57,7 +112,27 @@ def principal(request):
         'total_herramientas': total_herramientas,
         'herramientas': herramientas,
         'ruta': ruta,
+        'total_disponibles': total_disponibles,
+        'total_no_disponibles_obra': total_no_disponibles_obra,
+        'total_no_disponibles_malogrado': total_no_disponibles_malogrado,
+        'total_no_especificado': total_no_especificado,
+        'es_administrador': es_administrador(request.user),
     })
+
+@login_required
+def modificar_estado(request, lectura_id):
+    lectura = get_object_or_404(lecturaRFID, id=lectura_id)
+
+    if request.method == 'POST':
+        nuevo_estado = request.POST.get('estado')
+        if nuevo_estado in dict(lecturaRFID.ESTADOS_HERRAMIENTA):
+            lectura.estado = nuevo_estado
+            lectura.save()
+            return redirect('principal')
+    
+    return render(request, 'modificar_estado.html', {'lectura': lectura})
+
+@login_required
 def seleccionar_ruta(request):
     if request.method == 'POST':
         captura_ruta = request.POST.get('nueva_ruta', '') 
@@ -72,23 +147,42 @@ def seleccionar_ruta(request):
         return redirect('principal')
     return render(request, 'seleccionar_ruta.html')
 
+@login_required
 def administrar_codigos(request):
-    # Verificar si se envió el formulario
     if request.method == 'POST':
-        # Obtener los datos del formulario
         etiqueta_id = request.POST.get('etiqueta_id')
         nombre_herramienta = request.POST.get('nombre_herramienta')
-        
-        # Guardar los datos en la base de datos
-        nuevo_codigo = nombreEtiqueta(etiqueta_id=etiqueta_id, nombre_herramienta=nombre_herramienta)
-        nuevo_codigo.save()
-        
-        # Renderizar la plantilla con el mensaje de confirmación
-        return render(request, 'administrar_codigos.html', {'datos_guardados': True})
+        confirmacion = request.POST.get('confirmacion')
 
-    # Si no se envió el formulario, mostrar la página normalmente
+        # Buscar si existe una etiqueta con ese ID
+        etiqueta = nombreEtiqueta.objects.filter(etiqueta_id=etiqueta_id).first()
+        
+        if etiqueta and not confirmacion:
+            mensaje = "La etiqueta ya existe con el nombre '{}'.".format(etiqueta.nombre_herramienta)
+            advertencia = "Está a punto de cambiar el nombre de una etiqueta existente. ¿Está seguro de continuar?"
+            return render(request, 'administrar_codigos.html', {
+                'mensaje': mensaje,
+                'advertencia': advertencia,
+                'etiqueta_id': etiqueta_id,
+                'nombre_herramienta': nombre_herramienta,
+                'mostrar_confirmacion': True,
+            })
+        
+        etiqueta, created = nombreEtiqueta.objects.update_or_create(
+            etiqueta_id=etiqueta_id,
+            defaults={'nombre_herramienta': nombre_herramienta},
+        )
+        
+        if created:
+            mensaje = "Etiqueta creada exitosamente."
+        else:
+            mensaje = "Etiqueta actualizada exitosamente."
+        
+        return render(request, 'administrar_codigos.html', {'mensaje': mensaje})
+    
     return render(request, 'administrar_codigos.html')
 
+@login_required
 def salir(request):
     logout(request)
     return redirect('/')

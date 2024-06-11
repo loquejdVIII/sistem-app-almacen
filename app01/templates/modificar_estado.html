@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar Estado</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}">
+    <style>
+        /* Estilo específico para este formulario */
+        form {
+            max-width: 400px; /* Ancho máximo del formulario */
+            margin: 0 auto; /* Centrar el formulario horizontalmente */
+            padding: 20px; /* Espacio interno para separar los elementos del borde */
+            background-color: #ffffff; /* Fondo blanco */
+            border: 1px solid #dddddd; /* Borde del formulario */
+            border-radius: 5px; /* Bordes redondeados */
+        }
+
+        form label {
+            display: block; /* Cada etiqueta en una línea */
+            margin-bottom: 10px; /* Espacio inferior entre etiquetas y controles */
+        }
+
+        form select, form button {
+            display: block; /* Cada control en una línea */
+            width: 100%; /* Ancho completo del control */
+            padding: 10px; /* Espacio interno del control */
+            margin-bottom: 20px; /* Espacio inferior entre controles */
+            border: 1px solid #cccccc; /* Borde del control */
+            border-radius: 5px; /* Bordes redondeados */
+            box-sizing: border-box; /* Incluir borde en el ancho y alto total */
+        }
+
+        form button {
+            background-color: #4CAF50; /* Verde */
+            color: white; /* Texto blanco */
+            border: none; /* Sin borde */
+            cursor: pointer; /* Cursor de puntero al pasar sobre el botón */
+        }
+
+        form button.volver {
+            background-color: #808080; /* Gris */
+        }
+    </style>
+</head>
+<body>
+    <h1>Modificar Estado de {{ lectura.nombre_herramienta }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="estado">Estado:</label>
+        <select id="estado" name="estado">
+            {% for valor, nombre in lectura.ESTADOS_HERRAMIENTA %}
+                <option value="{{ valor }}" {% if valor == lectura.estado %}selected{% endif %}>{{ nombre }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Guardar</button>
+        <button type="button" class="volver" onclick="window.location.href='{% url 'principal' %}'">Volver</button>
+    </form>
+
+    <script>
+        // Mostrar mensaje cuando se envía el formulario
+        document.querySelector('form').addEventListener('submit', function() {
+            alert('Estado modificado correctamente.');
+        });
+    </script>
+</body>
+</html>

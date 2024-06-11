@@ -5,26 +5,86 @@
     <meta charset="UTF-8">
     <title>Administrar Códigos de Herramientas</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}">
+    <style>
+        /* Estilo específico para este formulario */
+        form {
+            max-width: 400px; /* Ancho máximo del formulario */
+            margin: 0 auto; /* Centrar el formulario horizontalmente */
+            padding: 20px; /* Espacio interno para separar los elementos del borde */
+            background-color: #ffffff; /* Fondo blanco */
+            border: 1px solid #dddddd; /* Borde del formulario */
+            border-radius: 5px; /* Bordes redondeados */
+        }
+
+        form label {
+            display: block; /* Cada etiqueta en una línea */
+            margin-bottom: 10px; /* Espacio inferior entre etiquetas y controles */
+        }
+
+        form select, form button {
+            display: block; /* Cada control en una línea */
+            width: 100%; /* Ancho completo del control */
+            padding: 10px; /* Espacio interno del control */
+            margin-bottom: 20px; /* Espacio inferior entre controles */
+            border: 1px solid #cccccc; /* Borde del control */
+            border-radius: 5px; /* Bordes redondeados */
+            box-sizing: border-box; /* Incluir borde en el ancho y alto total */
+        }
+
+        form button {
+            background-color: #4CAF50; /* Verde */
+            color: white; /* Texto blanco */
+            border: none; /* Sin borde */
+            cursor: pointer; /* Cursor de puntero al pasar sobre el botón */
+        }
+
+        form button.volver {
+            background-color: #808080; /* Gris */
+        }
+
+        form input[type="text"] {
+            width: 100%; /* Ancho completo del campo de entrada */
+            padding: 10px; /* Espacio interno del campo de entrada */
+            margin-bottom: 20px; /* Espacio inferior uniforme */
+            border: 1px solid #cccccc; /* Borde del campo de entrada */
+            border-radius: 5px; /* Bordes redondeados */
+            box-sizing: border-box; /* Incluir borde en el ancho y alto total */
+        }
+    </style>
 </head>
 <body>
     <h1>Administrar Códigos de Herramientas</h1>
-    <form method="post">
-        {% csrf_token %}
-        <div class="input-group">
-            <label for="etiqueta_id">ID de la Etiqueta:</label>
-            <input type="text" id="etiqueta_id" name="etiqueta_id" required>
-        </div>
-        <div class="input-group">
-            <label for="nombre_herramienta">Nombre de la Herramienta:</label>
-            <input type="text" id="nombre_herramienta" name="nombre_herramienta" required>
-        </div>
-        <button type="submit" class="green-button">Guardar</button>
-    </form>
-    <!-- Mensaje de confirmación -->
-    {% if datos_guardados %}
-        <p class="mensaje-confirmacion">Datos guardados correctamente</p>
+    
+    {% if mensaje %}
+        <p>{{ mensaje }}</p>
     {% endif %}
-    <!-- Botón para regresar -->
-    <a href="{% url 'principal' %}" class="grey-button">Regresar</a>
+    
+    {% if advertencia %}
+        <p>{{ advertencia }}</p>
+        <form method="post" action="{% url 'administrar_codigos' %}">
+            {% csrf_token %}
+            <input type="hidden" name="etiqueta_id" value="{{ etiqueta_id }}">
+            <input type="hidden" name="nombre_herramienta" value="{{ nombre_herramienta }}">
+            <input type="hidden" name="confirmacion" value="true">
+            <button type="submit">Confirmar</button>
+            <button type="button" class="volver" onclick="window.location.href='{% url 'principal' %}'">Volver</button>
+        </form>
+    {% else %}
+        <form method="post" action="{% url 'administrar_codigos' %}">
+            {% csrf_token %}
+            <div>
+                <label for="etiqueta_id">ID de la Etiqueta:</label>
+                <input type="text" id="etiqueta_id" name="etiqueta_id" required>
+            </div>
+            <div>
+                <label for="nombre_herramienta">Nombre de la Herramienta:</label>
+                <input type="text" id="nombre_herramienta" name="nombre_herramienta" required>
+            </div>
+            <button type="submit">Guardar</button>
+            <button type="button" class="volver" onclick="window.location.href='{% url 'principal' %}'">Volver</button>
+        </form>
+    {% endif %}
+    
+    
 </body>
 </html>

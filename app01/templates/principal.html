@@ -4,24 +4,167 @@
 <head>
     <meta charset="UTF-8">
     <title>Herramientas en el Almacén</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("button[name='leer_datos']").click(function(event){
+                event.preventDefault();
+                $.post("{% url 'control_monitor' %}", {
+                    action: 'start',
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, function(data){
+                    alert(data.message);
+                });
+            });
+
+            $("button[name='detener_lectura']").click(function(event){
+                event.preventDefault();
+                $.post("{% url 'control_monitor' %}", {
+                    action: 'stop',
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, function(data){
+                    alert(data.message);
+                });
+            
+                
+
+
+
+            });
+            // $("button[name='actualizar_datos']").click(function(event){
+            //     event.preventDefault();
+            //     $.post("{% url 'control_monitor' %}", {
+            //         action: 'update',
+            //         csrfmiddlewaretoken: '{{ csrf_token }}'
+            //     }, function(data){
+            //         if (data.status === "success") {
+            //             alert(data.message);
+            //         } else {
+            //             alert("Error: " + data.message);
+            //         }
+            //     }).fail(function(xhr, status, error) {
+            //         alert("An error occurred: " + xhr.responseText);
+            //     });
+            // });
+            
+            $("button[name='limpiar_datos']").click(function(event){
+                event.preventDefault();
+                $.post("{% url 'control_monitor' %}", {
+                    action: 'clear',
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, function(data){
+                    if (data.status === "success") {
+                        alert(data.message);
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                }).fail(function(xhr, status, error) {
+                    alert("An error occurred: " + xhr.responseText);
+                });
+            });
+
+
+
+
+            
+        });
+    </script>
+
 </head>
 <body>
+    <div class="header">
+        <img src="{% static 'imagenes/logo.png' %}" alt="Logo de la empresa">
+        <span class="title">CONSORCIO FENIX SERVICIOS GENERALES S.A.C</span>
+    </div>        
 
     {% if mensaje_error %}
-        <p class="error">{{ mensaje_error }}</p>
+        <p>{{ mensaje_error }}</p>
     {% endif %}
 
-    <div class="usuario">
-        <p>Usuario: {{ request.user.username }}</p>
+    <div>
+        <p class="usuario">Usuario: {{ request.user.username }}</p>
     </div>
 
-    <div class="welcome">
-        <a href="{% url 'salir' %}" class="button-grey">Cerrar Sesión</a>
+    <div class="top-right-buttons">
+        <a href="{% url 'salir' %}" class="button grey">Cerrar Sesión</a>
+        <a href="{% url 'admin:index' %}" class="button grey">Acceder al administrador</a>      
     </div>
 
+    <h1>ALMACEN 01</h1>
+    {% if es_administrador %}
     <h1>Número total de herramientas en el almacén: {{ total_herramientas }}</h1>
+    {% endif %}
+
+    {% if es_administrador %}
+    <div class="background-container">
+        <div class="container">
+            <div class="estado-container">
+                <h2>Estado de herramienta</h2>
+                <ul>
+                    <li class="{% if total_disponibles > 0 %}green{% else %}black{% endif %}">Disponibles: {{ total_disponibles }}</li>
+                    <li class="{% if total_no_disponibles_obra > 0 %}red{% else %}black{% endif %}">No disponibles (en obra): {{ total_no_disponibles_obra }}</li>
+                    <li class="{% if total_no_disponibles_malogrado > 0 %}orange{% else %}black{% endif %}">No disponibles (malogrado): {{ total_no_disponibles_malogrado }}</li>
+                    <li class="{% if total_no_especificado > 0 %}black{% endif %}">No especificado: {{ total_no_especificado }}</li>
+                </ul>
+            </div>
+            <div class="chart-container">
+                <canvas id="herramientasChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>    
     
+    <canvas id="herramientasChart" width="400" height="400"></canvas>
+    <script>
+        var ctx = document.getElementById('herramientasChart').getContext('2d');
+        var herramientasChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Disponibles', 'No disponibles (en obra)', 'No disponibles (malogrado)', 'No especificado'],
+                datasets: [{
+                    label: 'Estado de Herramientas',
+                    data: [
+                        {{ total_disponibles }},
+                        {{ total_no_disponibles_obra }},
+                        {{ total_no_disponibles_malogrado }},
+                        {{ total_no_especificado }}
+                    ],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Estado de Herramientas'
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+
+    {% if es_administrador %}
     <div class="ruta">
         <p>Ruta actual de la carpeta de lectura:</p>
         {% if ruta %}
@@ -29,9 +172,10 @@
         {% else %}
             <span class="ruta-no-especificada">No especificada</span>
         {% endif %}
-        <a href="{% url 'seleccionar_ruta' %}" class="cambiar-ruta">Cambiar</a>
-    </div>    
-    
+        <a href="{% url 'seleccionar_ruta' %}" class="button green">Cambiar</a>
+    </div>
+    {% endif %}
+
     <form method="get">
         <label for="herramienta">Filtrar por herramienta:</label>
         <select name="herramienta" id="herramienta">
@@ -39,21 +183,34 @@
             {% for herramienta in herramientas %}
                 <option value="{{ herramienta.nombre_herramienta }}">{{ herramienta.nombre_herramienta }}</option>
             {% endfor %}
-        </select>                
-        <button type="submit">Filtrar</button>
+        </select>
+    
+        <label for="fecha_creacion">Filtrar por fecha de creación:</label>
+        <input type="date" id="fecha_creacion" name="fecha_creacion">
+    
+        <button type="submit" class="button green">Filtrar</button>
     </form>
-    <form method="post" id="leer-datos-form">
+
+    {% if es_administrador %}
+    <form method="post">
         {% csrf_token %}
-        <button type="submit" name="leer_datos">Leer Datos</button>
-        <button type="submit" name="detener_lectura">Detener Lectura</button>
-        <button type="submit" name="actualizar_datos">Actualizar</button>
-        <button type="submit" name="limpiar_datos">Limpiar</button>
-    </form>      
-    <table class="data-table">
+        <button type="submit" name="leer_datos" class="button green">Leer Datos</button>
+        <button type="submit" name="detener_lectura" class="button green">Detener Lectura</button>
+        <button type="submit" name="actualizar_datos" class="button green">Actualizar</button>
+        <button type="submit" name="limpiar_datos" class="button green">Limpiar</button>
+        <a href="{% url 'administrar_codigos' %}" class="button green">Administrar Códigos de Herramientas</a>
+    </form>
+    {% endif %}
+
+    <table class="styled-table">
         <thead>
             <tr>
-                <th>Tiempo</th>
+                <th>N°</th>
+                <th>Fecha de generación</th>
+                <th>Tiempo de lectura</th>
                 <th>Nombre de la herramienta</th>
+                <th>Estado</th>
+                <th></th>
                 <th>Etiqueta ID</th>
                 <th>Longitud</th>
                 <th>Antena</th>
@@ -64,8 +221,14 @@
         <tbody>
             {% for lectura in lecturas %}
                 <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ lectura.fecha_modificacion }}</td>
                     <td>{{ lectura.tiempo }}</td>
                     <td>{{ lectura.nombre_herramienta }}</td>
+                    <td class="{% if lectura.estado == 'disponible' %}green{% elif lectura.estado == 'no_disponible_obra' %}red{% elif lectura.estado == 'no_disponible_malogrado' %}orange{% else %}black{% endif %}">
+                        {{ lectura.get_estado_display }}
+                    </td>
+                    <td><a href="{% url 'modificar_estado' lectura.id %}">Modificar</a></td>
                     <td>{{ lectura.tag_id }}</td>
                     <td>{{ lectura.length }}</td>
                     <td>{{ lectura.ant }}</td>
@@ -74,10 +237,6 @@
                 </tr>
             {% endfor %}
         </tbody>
-    </table>    
-    <a href="{% url 'administrar_codigos' %}" class="administrar-codigos">Administrar Códigos de Herramientas</a>
-    <div class="admin-link">
-        <a href="{% url 'admin:index' %}" class="admin-link">Acceder al administrador</a>      
-    </div>
+    </table>
 </body>
 </html>

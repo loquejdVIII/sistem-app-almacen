@@ -8,18 +8,33 @@ class nombreEtiqueta(models.Model):
         return self.nombre_herramienta
       
     class Meta:
-        verbose_name_plural = "Identificadores de etiquetas de códigos"
-        verbose_name = "un identificador de etiqueta de codigo"
+        verbose_name_plural = "Nombres de herramientas según su ID"
+        verbose_name = "Nombre de herramienta según su ID"
 
 class lecturaRFID(models.Model):
 #    models.DateTimeField()
+    ESTADOS_HERRAMIENTA = [
+        ('no_especificado', 'No especificado'),
+        ('disponible', 'Disponible'),
+        ('no_disponible_obra', 'No disponible (en obra)'),
+        ('no_disponible_malogrado', 'No disponible (malogrado)'),
+    ]
     tiempo = models.CharField(max_length=8)
     tag_id = models.CharField(max_length=24)
-    length = models.IntegerField()
+    length = models.CharField(max_length=10)
     ant = models.IntegerField()
     cnt = models.IntegerField()
-    rssi = models.IntegerField()
+    rssi = models.CharField(max_length=10)
+    nombre_archivo = models.CharField(max_length=255)
+    fecha_modificacion = models.DateTimeField()
     nombre_herramienta = models.CharField(max_length=100, blank=True, null=True)
+    estado = models.CharField(max_length=23, choices=ESTADOS_HERRAMIENTA, default='disponible')
+
+    def hex_value(self, value):
+        try:
+            return hex(int(value))
+        except ValueError:
+            return ''
 
     def asociar_nombre_herramienta(self):
         try:
@@ -38,13 +53,13 @@ class lecturaRFID(models.Model):
         verbose_name = "una nueva lectura RFID"
     
     def __str__(self):
-        return f"Lectura de TagID: {self.tag_id} en {self.tiempo}"
+        return f"Lectura RFID - ID: {self.tag_id}, Tiempo: {self.tiempo}, Estado: {self.estado}, Nombre de la herramienta asignado: {self.nombre_herramienta if self.nombre_herramienta else 'No asignado'}"
 
 class seleccionarRuta(models.Model):
     carpeta_excel = models.CharField(max_length=255)
 
     def __str__(self):
-        return "config"
+        return "carpeta_excel"
     
     class Meta:
         verbose_name_plural = "Configuración de la ruta de lectura"
