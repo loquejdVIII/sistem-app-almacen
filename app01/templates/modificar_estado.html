@@ -3,65 +3,56 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Modificar Estado</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}">
-    <style>
-        /* Estilo específico para este formulario */
-        form {
-            max-width: 400px; /* Ancho máximo del formulario */
-            margin: 0 auto; /* Centrar el formulario horizontalmente */
-            padding: 20px; /* Espacio interno para separar los elementos del borde */
-            background-color: #ffffff; /* Fondo blanco */
-            border: 1px solid #dddddd; /* Borde del formulario */
-            border-radius: 5px; /* Bordes redondeados */
-        }
-
-        form label {
-            display: block; /* Cada etiqueta en una línea */
-            margin-bottom: 10px; /* Espacio inferior entre etiquetas y controles */
-        }
-
-        form select, form button {
-            display: block; /* Cada control en una línea */
-            width: 100%; /* Ancho completo del control */
-            padding: 10px; /* Espacio interno del control */
-            margin-bottom: 20px; /* Espacio inferior entre controles */
-            border: 1px solid #cccccc; /* Borde del control */
-            border-radius: 5px; /* Bordes redondeados */
-            box-sizing: border-box; /* Incluir borde en el ancho y alto total */
-        }
-
-        form button {
-            background-color: #4CAF50; /* Verde */
-            color: white; /* Texto blanco */
-            border: none; /* Sin borde */
-            cursor: pointer; /* Cursor de puntero al pasar sobre el botón */
-        }
-
-        form button.volver {
-            background-color: #808080; /* Gris */
-        }
-    </style>
+    <title>Modificar Estado de la Herramienta</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/estilo_modificar_estado.css' %}">
 </head>
 <body>
-    <h1>Modificar Estado de {{ lectura.nombre_herramienta }}</h1>
-    <form method="post">
-        {% csrf_token %}
-        <label for="estado">Estado:</label>
-        <select id="estado" name="estado">
-            {% for valor, nombre in lectura.ESTADOS_HERRAMIENTA %}
-                <option value="{{ valor }}" {% if valor == lectura.estado %}selected{% endif %}>{{ nombre }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">Guardar</button>
-        <button type="button" class="volver" onclick="window.location.href='{% url 'principal' %}'">Volver</button>
-    </form>
+    <!-- <div class="header">
+        <img src="{% static 'imagenes/logo.png' %}" alt="Logo de la empresa">
+        <span class="title">CONSORCIO FENIX SERVICIOS GENERALES S.A.C</span>
+    </div> -->
 
-    <script>
-        // Mostrar mensaje cuando se envía el formulario
-        document.querySelector('form').addEventListener('submit', function() {
-            alert('Estado modificado correctamente.');
-        });
-    </script>
+    <div class="container">
+        <h1>Modificar Estado de la Herramienta</h1>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <label for="tag_id">ID de la Etiqueta:</label>
+            <input type="text" id="tag_id" name="tag_id" value="{% if herramienta %}{{ herramienta.tag_id }}{% endif %}" required>
+            <button type="submit" name="buscar" class="button green">Buscar</button>
+        </form>
+
+        {% if herramienta %}
+            <h2>Información de la Herramienta</h2>
+            <p>Nombre: {{ herramienta.nombre_herramienta }}</p>
+            <p>Estado Actual: {{ herramienta.get_estado_display }}</p>
+            <p>Longitud: {{ herramienta.length }}</p>
+            <p>Antena: {{ herramienta.ant }}</p>
+            <p>Contador: {{ herramienta.cnt }}</p>
+            <p>Índice de Intensidad de la Señal Recibida (RSSI): {{ herramienta.rssi }}</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="tag_id" value="{{ herramienta.tag_id }}">
+                <label for="estado">Nuevo Estado:</label>
+                <select id="estado" name="estado" required>
+                    <option value="disponible" {% if herramienta.estado == 'disponible' %}selected{% endif %}>Disponible</option>
+                    <option value="no_disponible_obra" {% if herramienta.estado == 'no_disponible_obra' %}selected{% endif %}>No disponible (en obra)</option>
+                    <option value="no_disponible_malogrado" {% if herramienta.estado == 'no_disponible_malogrado' %}selected{% endif %}>No disponible (malogrado)</option>
+                    <option value="no_especificado" {% if herramienta.estado == 'no_especificado' %}selected{% endif %}>No especificado</option>
+                </select>
+                <button type="submit" name="modificar" class="button green">Modificar Estado</button>
+            </form>
+        {% endif %}
+
+        <a href="{% url 'principal' %}" class="button grey">Volver a la Página Principal</a>
+    </div>
 </body>
 </html>

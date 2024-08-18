@@ -8,6 +8,7 @@ from django.contrib.auth import logout
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 import threading
+from django.contrib import messages
 
 def es_administrador(user):
     return user.groups.filter(name='Administrador').exists()
@@ -106,6 +107,12 @@ def principal(request):
     total_no_disponibles_malogrado = lecturas.filter(estado='no_disponible_malogrado').count()
     total_no_especificado = lecturas.filter(estado='no_especificado').count()
 
+    herramienta_busq = lecturaRFID.objects.all()
+    search_query = request.GET.get('search', '')
+    
+    if search_query:
+        herramienta_busq = herramienta_busq.filter(tag_id=search_query)
+
     # Renderizar el template con los datos de las lecturas y herramientas
     return render(request, 'principal.html', {
         'lecturas': lecturas,
@@ -116,21 +123,37 @@ def principal(request):
         'total_no_disponibles_obra': total_no_disponibles_obra,
         'total_no_disponibles_malogrado': total_no_disponibles_malogrado,
         'total_no_especificado': total_no_especificado,
+        'herramienta_busq': herramienta_busq,
+        'search_query': search_query,
         'es_administrador': es_administrador(request.user),
     })
 
 @login_required
-def modificar_estado(request, lectura_id):
-    lectura = get_object_or_404(lecturaRFID, id=lectura_id)
-
+def modificar_estado(request):
+    herramienta = None
     if request.method == 'POST':
-        nuevo_estado = request.POST.get('estado')
-        if nuevo_estado in dict(lecturaRFID.ESTADOS_HERRAMIENTA):
-            lectura.estado = nuevo_estado
-            lectura.save()
-            return redirect('principal')
-    
-    return render(request, 'modificar_estado.html', {'lectura': lectura})
+        if 'buscar' in request.POST:
+            tag_id = request.POST.get('tag_id')
+            herramientas = lecturaRFID.objects.filter(tag_id=tag_id)
+            if herramientas.exists():
+                herramienta = herramientas.first()  # Obtener el primer resultado
+            else:
+                messages.error(request, f'No se encontró ninguna herramienta con el ID {tag_id}.')
+        elif 'modificar' in request.POST:
+            tag_id = request.POST.get('tag_id')
+            nuevo_estado = request.POST.get('estado')
+            herramientas = lecturaRFID.objects.filter(tag_id=tag_id)
+            if herramientas.exists():
+                herramienta = herramientas.first()  # Obtener el primer resultado
+                herramienta.estado = nuevo_estado
+                herramienta.save()
+                messages.success(request, f'El estado de la herramienta con ID {tag_id} ha sido modificado a {nuevo_estado}.')
+            else:
+                messages.error(request, f'No se encontró ninguna herramienta con el ID {tag_id}.')
+
+    return render(request, 'modificar_estado.html', {
+        'herramienta': herramienta,
+    })
 
 @login_required
 def seleccionar_ruta(request):

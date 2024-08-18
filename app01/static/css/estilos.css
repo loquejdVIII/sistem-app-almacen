@@ -167,3 +167,33 @@ td.black {
     padding: 20px; /* Espacio interior para separar el contenido del borde */
     margin-bottom: 20px; /* Ajusta el margen inferior */
 }
+
+/* Estilos para el contenedor principal */
+.main-container {
+    background-color: #ffffff; /* Color verde */
+    padding: 20px; /* Espacio interior para separar el contenido del borde */
+    width: 94%; /* Ancho ajustable */
+    min-height: 400px; /* Altura mínima para evitar que el contenedor sea demasiado pequeño */
+    margin: auto; /* Centra el contenedor horizontalmente */
+    border: 1px solid #ffffff; /* Borde verde oscuro */
+    box-sizing: border-box; /* Incluye padding y border en el ancho total */
+    resize: both; /* Permite ajustar el tamaño tanto horizontal como verticalmente */
+    overflow: auto; /* Añade scroll si el contenido es más grande que el contenedor */
+}
+
+body {
+    background-color: #98ff98; /* Color de fondo rojo */
+    margin: 0; /* Elimina el margen por defecto del body */
+    padding: 0; /* Elimina el padding por defecto del body */
+    font-family: Arial, sans-serif; /* Puedes elegir la fuente que prefieras */
+}
+
+.celeste-box {
+    background-color: #d4f1f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 0px 0;
+    width: 100%; /* Ancho fijo */
+    max-width: 100%;
+    box-sizing: border-box;
+}

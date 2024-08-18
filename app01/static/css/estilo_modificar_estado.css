@@ -1,0 +1,28 @@
+/* Estilos para los botones */
+
+.button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    transition: background-color 0.3s ease; /* Transición suave para el efecto hover */
+}
+
+.button.green {
+    background-color: #4CAF50; /* Verde claro */
+}
+
+.button.green:hover {
+    background-color: #45a049; /* Color más oscuro en hover */
+}
+
+.button.grey {
+    background-color: #808080; /* Gris */
+}
+
+.button.grey:hover {
+    background-color: #696969; /* Color más oscuro en hover */
+}
