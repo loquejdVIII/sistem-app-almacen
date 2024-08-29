@@ -54,12 +54,10 @@ def control_monitor_view(request):
     
     return JsonResponse({"status": "error", "message": "Acción no válida"})
 
-@login_required
 def keep_monitor_running():
     while monitor:
         pass  # Mantener el monitor en ejecución
 
-@login_required
 def monitor_status_view(request):
     if monitor:
         return JsonResponse({"status": "running"})
